@@ -1,0 +1,15 @@
+// @flow
+import type { FieldProps } from 'react-final-form'
+
+type Messages = {
+  badInput?: string,
+  patternMismatch?: string,
+  rangeOverflow?: string,
+  rangeUnderflow?: string,
+  stepMismatch?: string,
+  tooLong?: string,
+  tooShort?: string,
+  typeMismatch?: string,
+  valueMissing?: string
+}
+export type Html5ValidationFieldProps = FieldProps & Messages
