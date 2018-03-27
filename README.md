@@ -1,4 +1,4 @@
-<img src="html5.png" align="right"/>
+<img src="docs/html5.png" align="right"/>
 
 # 🏁 React Final Form HTML5 Validation
 
