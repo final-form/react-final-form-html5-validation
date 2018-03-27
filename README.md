@@ -15,6 +15,10 @@
 
 Good question. The reason is that not everyone needs this functionality, and not everyone is using 🏁 React Final Form with the DOM (e.g. some people use it with React Native). Therefore it makes sense to make this a separate package. This version of `Field` is a thin wrapper over the official `Field` component, and the only `Field` API that this library uses/overrides is the field-level [`validate` prop](https://github.com/final-form/react-final-form#validate-value-any-allvalues-object--any), so even if you are using this library's `Field` component, you will still get improvements as features are added to the 🏁 React Final Form library in the future.
 
+| Safari | Chrome | Firefox |
+| ------ | ------ | ------- |
+| <img src="docs/safari.gif" width="295"/>    | <img src="docs/chrome.gif" width="295"/>    | <img src="docs/firefox.gif" width="295"/>     |
+
 ## Installation
 
 ```bash
@@ -28,6 +32,8 @@ yarn add react-final-form-html5-validation react-final-form final-form
 ```
 
 ## [Example](https://codesandbox.io/s/14r018yjp4) 👀
+
+[![Edit 🏁 React Final Form - HTML5 Validation Example](https://codesandbox.io/static/img/play-codesandbox.svg)](https://codesandbox.io/s/14r018yjp4)
 
 ## Usage
 
