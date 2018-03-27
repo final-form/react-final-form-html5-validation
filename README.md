@@ -1,4 +1,5 @@
 <img src="html5.png" align="right"/>
+
 # 🏁 React Final Form HTML5 Validation
 
 [![NPM Version](https://img.shields.io/npm/v/react-final-form-html5-validation.svg?style=flat)](https://www.npmjs.com/package/react-final-form-html5-validation)
