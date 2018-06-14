@@ -58,7 +58,7 @@ const MyForm = () => (
             required
             maxLength={20}
             tooLong="That name is too long!"
-            pattern={/}
+            pattern="[A-Z].+"
           />
         </div>
         ...
