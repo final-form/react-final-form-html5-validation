@@ -1,31 +1,29 @@
 {
   "name": "react-final-form-html5-validation",
   "version": "1.0.0",
-  "description":
-    "A swap-in replacement for 🏁 React Final Form's <Field> component to provide HTML5 Validation",
+  "description": "A swap-in replacement for 🏁 React Final Form's <Field> component to provide HTML5 Validation",
   "main": "dist/react-final-form-html5-validation.cjs.js",
   "jsnext:main": "dist/react-final-form-html5-validation.es.js",
   "module": "dist/react-final-form-html5-validation.es.js",
   "sideEffects": false,
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "start": "nps",
     "test": "nps test",
     "precommit": "lint-staged && npm start validate"
   },
-  "author":
-    "Erik Rasmussen <rasmussenerik@gmail.com> (http://github.com/erikras)",
+  "author": "Erik Rasmussen <rasmussenerik@gmail.com> (http://github.com/erikras)",
   "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/final-form/react-final-form-html5-validation.git"
   },
   "bugs": {
-    "url":
-      "https://github.com/final-form/react-final-form-html5-validation/issues"
+    "url": "https://github.com/final-form/react-final-form-html5-validation/issues"
   },
-  "homepage":
-    "https://github.com/final-form/react-final-form-html5-validation#readme",
+  "homepage": "https://github.com/final-form/react-final-form-html5-validation#readme",
   "devDependencies": {
     "babel-eslint": "^8.2.2",
     "babel-jest": "^22.4.1",
@@ -71,13 +69,19 @@
     "final-form": ">=4.0.0",
     "prop-types": "^15.6.0",
     "react": "^15.3.0 || ^16.0.0-0",
+    "react-dom": "^15.3.0 || ^16.0.0-0",
     "react-final-form": ">=3.0.0"
   },
   "jest": {
-    "setupFiles": ["raf/polyfill"]
+    "setupFiles": [
+      "raf/polyfill"
+    ]
   },
   "lint-staged": {
-    "*.{js*,ts*,json,md,css}": ["prettier --write", "git add"]
+    "*.{js*,ts*,json,md,css}": [
+      "prettier --write",
+      "git add"
+    ]
   },
   "bundlesize": [
     {
