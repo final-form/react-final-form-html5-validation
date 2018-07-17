@@ -4,6 +4,7 @@ import flow from 'rollup-plugin-flow'
 import commonjs from 'rollup-plugin-commonjs'
 import uglify from 'rollup-plugin-uglify'
 import replace from 'rollup-plugin-replace'
+import pkg from './package.json'
 
 const minify = process.env.MINIFY
 const format = process.env.FORMAT
@@ -41,6 +42,9 @@ if (es) {
   throw new Error('no format specified. --environment FORMAT:xxx')
 }
 
+const deps = Object.keys(pkg.dependencies || {})
+const peers = Object.keys(pkg.peerDependencies || {})
+
 export default {
   input: 'src/index.js',
   output: Object.assign(
@@ -49,6 +53,7 @@ export default {
       exports: 'named',
       globals: {
         react: 'React',
+        'react-dom': 'ReactDOM',
         'prop-types': 'PropTypes',
         'final-form': 'FinalForm',
         'react-final-form': 'ReactFinalForm'
@@ -56,11 +61,11 @@ export default {
     },
     output
   ),
-  external: ['react', 'prop-types', 'final-form', 'react-final-form'],
+  external: umd ? peers : deps.concat(peers),
   plugins: [
     resolve({ jsnext: true, main: true }),
     flow(),
-    commonjs({ include: 'node_modules/**' }),
+    umd && commonjs({ include: 'node_modules/**' }),
     babel({
       exclude: 'node_modules/**',
       babelrc: false,
