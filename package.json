@@ -69,6 +69,7 @@
     "final-form": ">=4.0.0",
     "prop-types": "^15.6.0",
     "react": "^15.3.0 || ^16.0.0-0",
+    "react-dom": "^15.3.0 || ^16.0.0-0",
     "react-final-form": ">=3.0.0"
   },
   "jest": {
