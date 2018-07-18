@@ -1,4 +1,5 @@
 import React from 'react'
+import ReactDOM from 'react-dom'
 import TestUtils from 'react-dom/test-utils'
 import { Form } from 'react-final-form'
 import Html5ValidationField from './Html5ValidationField'
@@ -107,12 +108,12 @@ describe('Html5ValidationField', () => {
   })
   describe('Html5ValidationField.validity', () => {
     const mockFindNode = (input, fn) => {
-      const backup = Html5ValidationField.findDOMNode
-      Html5ValidationField.findDOMNode = jest.fn(() => input)
+      const backup = ReactDOM.findDOMNode
+      ReactDOM.findDOMNode = jest.fn(() => input)
       fn()
-      expect(Html5ValidationField.findDOMNode).toHaveBeenCalled()
-      expect(Html5ValidationField.findDOMNode).toHaveBeenCalledTimes(1)
-      Html5ValidationField.findDOMNode = backup
+      expect(ReactDOM.findDOMNode).toHaveBeenCalled()
+      expect(ReactDOM.findDOMNode).toHaveBeenCalledTimes(1)
+      ReactDOM.findDOMNode = backup
     }
 
     it('should search DOM for input if the root is not the input', () => {
