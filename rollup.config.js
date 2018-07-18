@@ -68,8 +68,6 @@ export default {
     umd && commonjs({ include: 'node_modules/**' }),
     babel({
       exclude: 'node_modules/**',
-      babelrc: false,
-      presets: [['env', { modules: false }], 'stage-2'],
       plugins: ['external-helpers']
     }),
     umd
