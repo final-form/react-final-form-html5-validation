@@ -38,11 +38,10 @@ export default class Html5ValidationField extends React.Component<Props> {
     valueMissing: 'Required'
   }
 
-  static findDOMNode = (comp: Element | ?React.Component<any, any>) =>
-    ReactDOM.findDOMNode(comp)
+  static findDOMNode = ReactDOM.findDOMNode
 
   componentDidMount() {
-    const root: ?Element | Text = Html5ValidationField.findDOMNode(this)
+    const root: ?Element | Text = ReactDOM.findDOMNode(this)
     if (root) {
       let input
       if (/input|textarea|select/.test(root.nodeName.toLowerCase())) {
