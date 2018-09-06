@@ -47,7 +47,7 @@ export default class Html5ValidationField extends React.Component<Props> {
       } else if (root.querySelector) {
         const { name } = this.props
         input = ((((root: any): Element).querySelector(
-          `input[name=${name}],textarea[name=${name}],select[name=${name}]`
+          `input[name="${name}"],textarea[name="${name}"],select[name="${name}"]`
         ): any): WithValidity)
       }
       const foundInput = input && typeof input.setCustomValidity === 'function'
@@ -59,7 +59,10 @@ export default class Html5ValidationField extends React.Component<Props> {
   }
 
   validate = (value: ?any, allValues: Object) => {
-    const { input, props: { validate } } = this
+    const {
+      input,
+      props: { validate }
+    } = this
     if (input) {
       const validity: ?ValidityState = input && input.validity
       if (validate) {
