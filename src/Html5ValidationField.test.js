@@ -140,11 +140,42 @@ describe('Html5ValidationField', () => {
           expect(querySelector).toHaveBeenCalled()
           expect(querySelector).toHaveBeenCalledTimes(1)
           expect(querySelector.mock.calls[0][0]).toBe(
-            'input[name=foo],textarea[name=foo],select[name=foo]'
+            'input[name="foo"],textarea[name="foo"],select[name="foo"]'
           )
         }
       )
     })
+
+    it('should search DOM for input if the root is not the input, even for deep fields', () => {
+      const setCustomValidity = jest.fn()
+      const querySelector = jest.fn(() => ({
+        nodeName: 'input',
+        setCustomValidity,
+        validity: {
+          valueMissing: true
+        }
+      }))
+      mockFindNode(
+        {
+          nodeName: 'div',
+          querySelector
+        },
+        () => {
+          const spy = jest.fn(({ input }) => <input {...input} />)
+          TestUtils.renderIntoDocument(
+            <Form onSubmit={onSubmitMock} subscription={{}}>
+              {() => <Html5ValidationField name="foo.bar" render={spy} />}
+            </Form>
+          )
+          expect(querySelector).toHaveBeenCalled()
+          expect(querySelector).toHaveBeenCalledTimes(1)
+          expect(querySelector.mock.calls[0][0]).toBe(
+            'input[name="foo.bar"],textarea[name="foo.bar"],select[name="foo.bar"]'
+          )
+        }
+      )
+    })
+
     it('should fail silently if no DOM node could be found (probably SSR)', () => {
       const consoleSpy = jest
         .spyOn(global.console, 'error')
@@ -206,7 +237,7 @@ describe('Html5ValidationField', () => {
           expect(querySelector).toHaveBeenCalled()
           expect(querySelector).toHaveBeenCalledTimes(1)
           expect(querySelector.mock.calls[0][0]).toBe(
-            'input[name=foo],textarea[name=foo],select[name=foo]'
+            'input[name="foo"],textarea[name="foo"],select[name="foo"]'
           )
 
           expect(consoleSpy).toHaveBeenCalled()
