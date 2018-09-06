@@ -76,27 +76,27 @@ const MyForm = () => (
 
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
-* [Rules and Messages](#rules-and-messages)
-* [API](#api)
-  * [Rules](#rules)
-    * [`max?: Number`](#max-number)
-    * [`maxLength?: Number`](#maxlength-number)
-    * [`min?: Number`](#min-number)
-    * [`minLength?: Number`](#minlength-number)
-    * [`pattern?: string`](#pattern-string)
-    * [`required?: boolean`](#required-boolean)
-    * [`step?: Number`](#step-number)
-  * [Messages](#messages)
-    * [`badInput?: string`](#badinput-string)
-    * [`patternMismatch?: string`](#patternmismatch-string)
-    * [`rangeOverflow?: string`](#rangeoverflow-string)
-    * [`rangeUnderflow?: string`](#rangeunderflow-string)
-    * [`stepMismatch?: string`](#stepmismatch-string)
-    * [`tooLong?: string`](#toolong-string)
-    * [`tooShort?: string`](#tooshort-string)
-    * [`typeMismatch?: string`](#typemismatch-string)
-    * [`valueMissing?: string`](#valuemissing-string)
-* [Internationalization](#internationalization)
+- [Rules and Messages](#rules-and-messages)
+- [API](#api)
+  - [Rules](#rules)
+    - [`max?: Number`](#max-number)
+    - [`maxLength?: Number`](#maxlength-number)
+    - [`min?: Number`](#min-number)
+    - [`minLength?: Number`](#minlength-number)
+    - [`pattern?: string`](#pattern-string)
+    - [`required?: boolean`](#required-boolean)
+    - [`step?: Number`](#step-number)
+  - [Messages](#messages)
+    - [`badInput?: string`](#badinput-string)
+    - [`patternMismatch?: string`](#patternmismatch-string)
+    - [`rangeOverflow?: string`](#rangeoverflow-string)
+    - [`rangeUnderflow?: string`](#rangeunderflow-string)
+    - [`stepMismatch?: string`](#stepmismatch-string)
+    - [`tooLong?: string`](#toolong-string)
+    - [`tooShort?: string`](#tooshort-string)
+    - [`typeMismatch?: string`](#typemismatch-string)
+    - [`valueMissing?: string`](#valuemissing-string)
+- [Internationalization](#internationalization)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -190,7 +190,7 @@ The message to display when the value is required, but missing.
 
 ## Internationalization
 
-If internationalization is important to your project, you should probably create a component that wraps this component. Pulls the localized messages from the context, and renders:
+If internationalization is important to your project, you should probably create a component that wraps this component, pulls the localized messages from the context, and renders:
 
 ```jsx
 <Field {...props} {...messages} />
