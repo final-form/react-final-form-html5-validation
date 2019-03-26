@@ -156,35 +156,35 @@ The step size between the `min` and `max` values. If invalid, the `stepMismatch`
 
 The message to display [when the input is invalid somehow](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#suffering-from-bad-input).
 
-#### `patternMismatch?: string`
+#### `patternMismatch?: string|(value?: any, props: Object) => string`
 
 The message to display when the value does not match the pattern specified by the `pattern` prop.
 
-#### `rangeOverflow?: string`
+#### `rangeOverflow?: string|(value?: any, props: Object) => string`
 
 The message to display when the value is higher than the `max` prop.
 
-#### `rangeUnderflow?: string`
+#### `rangeUnderflow?: string|(value?: any, props: Object) => string`
 
 The message to display when the value is lower than the `min` prop.
 
-#### `stepMismatch?: string`
+#### `stepMismatch?: string|(value?: any, props: Object) => string`
 
 The message to display the value is not one of the valid steps specified by the `step` prop.
 
-#### `tooLong?: string`
+#### `tooLong?: string|(value?: any, props: Object) => string`
 
 The message to display when the value longer than the value specified by the `maxLength` prop.
 
-#### `tooShort?: string`
+#### `tooShort?: string|(value?: any, props: Object) => string`
 
 The message to display when the value shorter than the value specified by the `minLength` prop.
 
-#### `typeMismatch?: string`
+#### `typeMismatch?: string|(value?: any, props: Object) => string`
 
 The message to display when the value does not match the `type` prop.
 
-#### `valueMissing?: string`
+#### `valueMissing?: string|(value?: any, props: Object) => string`
 
 The message to display when the value is required, but missing.
 
