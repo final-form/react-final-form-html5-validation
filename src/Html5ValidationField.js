@@ -80,7 +80,10 @@ export default class Html5ValidationField extends React.Component<Props> {
           return validity.customError
         }
         const errorKey: ?string = errorKeys.find(key => (validity: Object)[key])
-        const error = errorKey && this.props[errorKey]
+        let error = errorKey && this.props[errorKey]
+          if (typeof error === 'function') {
+              error = error(value, this.props)
+          }
         input.setCustomValidity(error)
         return error
       }
