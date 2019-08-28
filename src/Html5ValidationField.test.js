@@ -70,6 +70,22 @@ describe('Html5ValidationField', () => {
     })
   })
 
+  it('should pass ref through to the input', () => {
+    const ref = React.createRef()
+    TestUtils.renderIntoDocument(
+      <Form onSubmit={onSubmitMock} subscription={{ values: true }}>
+        {() => (
+          <form>
+            <Html5ValidationField name="name" component="input" ref={ref} />
+          </form>
+        )}
+      </Form>
+    )
+
+    expect(ref.current).not.toBe(null)
+    expect(ref.current instanceof HTMLInputElement).toBe(true)
+  })
+
   describe('Html5ValidationField.messages', () => {
     const testNotPassThrough = message => {
       const consoleSpy = jest
@@ -537,34 +553,43 @@ describe('Html5ValidationField', () => {
         }
       )
     })
-      it('should support functions as default error keys', () => {
-        const setCustomValidity = jest.fn()
-        mockFindNode(
-            {
-                nodeName: 'input',
-                setCustomValidity,
-                validity: {
-                    tooShort: true
-                }
-            },
-            () => {
-              const spy = jest.fn(({ input }) => <input {...input} />)
-              TestUtils.renderIntoDocument(
-                <Form initialValues={{ foo: 'bar' }} onSubmit={onSubmitMock} subscription={{}}>
-                  {() =>
-                      <Html5ValidationField
-                          tooShort={(value, { minLength }) =>
-                              `Value ${value} should have at least ${minLength} characters.`}
-                          minLength={8} name="foo" render={spy} />
+    it('should support functions as default error keys', () => {
+      const setCustomValidity = jest.fn()
+      mockFindNode(
+        {
+          nodeName: 'input',
+          setCustomValidity,
+          validity: {
+            tooShort: true
+          }
+        },
+        () => {
+          const spy = jest.fn(({ input }) => <input {...input} />)
+          TestUtils.renderIntoDocument(
+            <Form
+              initialValues={{ foo: 'bar' }}
+              onSubmit={onSubmitMock}
+              subscription={{}}
+            >
+              {() => (
+                <Html5ValidationField
+                  tooShort={(value, { minLength }) =>
+                    `Value ${value} should have at least ${minLength} characters.`
                   }
-                </Form>
-              )
-              expect(spy).toHaveBeenCalled()
-              expect(spy).toHaveBeenCalledTimes(2)
-              expect(spy.mock.calls[1][0].meta.error).toBe('Value bar should have at least 8 characters.')
-            }
-        )
-      })
+                  minLength={8}
+                  name="foo"
+                  render={spy}
+                />
+              )}
+            </Form>
+          )
+          expect(spy).toHaveBeenCalled()
+          expect(spy).toHaveBeenCalledTimes(2)
+          expect(spy.mock.calls[1][0].meta.error).toBe(
+            'Value bar should have at least 8 characters.'
+          )
+        }
+      )
+    })
   })
-
 })
