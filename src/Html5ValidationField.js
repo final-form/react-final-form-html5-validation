@@ -22,7 +22,7 @@ type WithValidity = {
   setCustomValidity: (error: ?string) => void
 }
 
-export default class Html5ValidationField extends React.Component<Props> {
+class Html5ValidationField extends React.Component<Props> {
   props: Props
   input: ?WithValidity
 
@@ -81,9 +81,9 @@ export default class Html5ValidationField extends React.Component<Props> {
         }
         const errorKey: ?string = errorKeys.find(key => (validity: Object)[key])
         let error = errorKey && this.props[errorKey]
-          if (typeof error === 'function') {
-              error = error(value, this.props)
-          }
+        if (typeof error === 'function') {
+          error = error(value, this.props)
+        }
         input.setCustomValidity(error)
         return error
       }
@@ -104,8 +104,20 @@ export default class Html5ValidationField extends React.Component<Props> {
       tooShort,
       typeMismatch,
       valueMissing,
+      innerRef,
       ...rest
     } = this.props
-    return React.createElement(Field, { validate: this.validate, ...rest })
+    return React.createElement(Field, {
+      validate: this.validate,
+      ref: innerRef,
+      ...rest
+    })
   }
 }
+
+export default React.forwardRef((props, ref) => (
+  React.createElement(Html5ValidationField, {
+    innerRef: ref,
+    ...props
+  })
+))
