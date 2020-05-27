@@ -67,7 +67,7 @@
     "raf": "^3.4.1",
     "react": "^16.8.1",
     "react-dom": "^16.8.1",
-    "react-final-form": "https://github.com/TylerRick/react-final-form.git#forwardRef-with_dist",
+    "react-final-form": "^6.5.0",
     "react-test-renderer": "^16.8.1",
     "rollup": "^1.1.2",
     "rollup-plugin-babel": "^4.3.2",
@@ -78,11 +78,11 @@
     "rollup-plugin-uglify": "^6.0.2"
   },
   "peerDependencies": {
-    "final-form": ">=4.0.0",
+    "final-form": ">=4.20.0",
     "prop-types": "^15.6.0",
     "react": "^15.3.0 || ^16.0.0-0",
     "react-dom": "^15.3.0 || ^16.0.0-0",
-    "react-final-form": ">=3.0.0"
+    "react-final-form": ">=6.5.0"
   },
   "jest": {
     "testEnvironment": "jsdom"
