@@ -1,17 +1,16 @@
 sudo: false
 language: node_js
 before_install:
-  - npm install -g npm@6.4.0
+  - npm install -g npm@latest
 cache:
   directories:
     - node_modules
 notifications:
   email: false
 node_js:
-  - '8'
-  - '9'
   - '10'
-  - 'stable'
+  - '12'
+  - '14'
 script:
   - npm start validate
 after_success:
