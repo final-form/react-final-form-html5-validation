@@ -1,12 +1,12 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
-import TestUtils from 'react-dom/test-utils'
+import { render, cleanup } from '@testing-library/react'
 import { Form } from 'react-final-form'
 import Html5ValidationField from './Html5ValidationField'
 
 const onSubmitMock = () => {}
 
-const getAttributes = el => {
+const getAttributes = (el) => {
   for (const key in el) {
     if (key.startsWith(`__reactEventHandlers$`)) {
       return el[key]
@@ -16,22 +16,31 @@ const getAttributes = el => {
 }
 
 describe('Html5ValidationField', () => {
+  afterEach(cleanup)
+
   describe('Html5ValidationField.rules', () => {
-    const testPassThrough = rule => {
+    const testPassThrough = (rule, testId = 'input') => {
       const consoleSpy = jest
         .spyOn(global.console, 'error')
         .mockImplementation(() => {})
-      const dom = TestUtils.renderIntoDocument(
+      const { getByTestId } = render(
         <Form onSubmit={onSubmitMock} subscription={{}}>
           {() => (
-            <Html5ValidationField name="foo" component="input" {...rule} />
+            <Html5ValidationField
+              name="foo"
+              component="input"
+              {...rule}
+              data-testid={testId}
+            />
           )}
         </Form>
       )
-      const input = TestUtils.findRenderedDOMComponentWithTag(dom, 'input')
+      const input = getByTestId(testId)
       expect(input).toBeDefined()
       const attributes = getAttributes(input)
-      Object.keys(rule).forEach(key => expect(attributes[key]).toBe(rule[key]))
+      Object.keys(rule).forEach((key) =>
+        expect(attributes[key]).toBe(rule[key])
+      )
       consoleSpy.mockRestore()
     }
 
@@ -40,13 +49,13 @@ describe('Html5ValidationField', () => {
     })
 
     it('should pass "pattern" through to input', () => {
-      testPassThrough({ pattern: 'text' })
-      testPassThrough({ pattern: 'search' })
-      testPassThrough({ pattern: 'url' })
-      testPassThrough({ pattern: 'tel' })
-      testPassThrough({ pattern: 'email' })
-      testPassThrough({ pattern: 'password' })
-      testPassThrough({ pattern: /look, ma, a regex!/ })
+      testPassThrough({ pattern: 'text' }, 'text')
+      testPassThrough({ pattern: 'search' }, 'search')
+      testPassThrough({ pattern: 'url' }, 'url')
+      testPassThrough({ pattern: 'tel' }, 'tel')
+      testPassThrough({ pattern: 'email' }, 'email')
+      testPassThrough({ pattern: 'password' }, 'password')
+      testPassThrough({ pattern: /look, ma, a regex!/ }, 'regex')
     })
 
     it('should pass "min" through to input', () => {
@@ -72,7 +81,7 @@ describe('Html5ValidationField', () => {
 
   it('should pass ref through to the input', () => {
     const ref = React.createRef()
-    TestUtils.renderIntoDocument(
+    render(
       <Form onSubmit={onSubmitMock} subscription={{ values: true }}>
         {() => (
           <form>
@@ -87,21 +96,26 @@ describe('Html5ValidationField', () => {
   })
 
   describe('Html5ValidationField.messages', () => {
-    const testNotPassThrough = message => {
+    const testNotPassThrough = (message) => {
       const consoleSpy = jest
         .spyOn(global.console, 'error')
         .mockImplementation(() => {})
-      const dom = TestUtils.renderIntoDocument(
+      const { getByTestId } = render(
         <Form onSubmit={onSubmitMock} subscription={{}}>
           {() => (
-            <Html5ValidationField name="foo" component="input" {...message} />
+            <Html5ValidationField
+              name="foo"
+              component="input"
+              {...message}
+              data-testid="input"
+            />
           )}
         </Form>
       )
-      const input = TestUtils.findRenderedDOMComponentWithTag(dom, 'input')
+      const input = getByTestId('input')
       expect(input).toBeDefined()
       const attributes = getAttributes(input)
-      Object.keys(message).forEach(key =>
+      Object.keys(message).forEach((key) =>
         expect(attributes[key]).toBeUndefined()
       )
       consoleSpy.mockRestore()
@@ -116,7 +130,7 @@ describe('Html5ValidationField', () => {
       'tooShort',
       'typeMismatch',
       'valueMissing'
-    ].forEach(key => {
+    ].forEach((key) => {
       it(`should not pass "${key}" through to input`, () => {
         testNotPassThrough({ [key]: 'All your base are belong to us' })
       })
@@ -148,7 +162,7 @@ describe('Html5ValidationField', () => {
         },
         () => {
           const spy = jest.fn(({ input }) => <input {...input} />)
-          TestUtils.renderIntoDocument(
+          render(
             <Form onSubmit={onSubmitMock} subscription={{}}>
               {() => <Html5ValidationField name="foo" render={spy} />}
             </Form>
@@ -178,7 +192,7 @@ describe('Html5ValidationField', () => {
         },
         () => {
           const spy = jest.fn(({ input }) => <input {...input} />)
-          TestUtils.renderIntoDocument(
+          render(
             <Form onSubmit={onSubmitMock} subscription={{}}>
               {() => <Html5ValidationField name="foo.bar" render={spy} />}
             </Form>
@@ -198,7 +212,7 @@ describe('Html5ValidationField', () => {
         .mockImplementation(() => {})
       mockFindNode(undefined, () => {
         const spy = jest.fn(({ input }) => <input {...input} />)
-        TestUtils.renderIntoDocument(
+        render(
           <Form onSubmit={onSubmitMock} subscription={{}}>
             {() => <Html5ValidationField name="foo" render={spy} />}
           </Form>
@@ -218,7 +232,7 @@ describe('Html5ValidationField', () => {
         },
         () => {
           const spy = jest.fn(({ input }) => <input {...input} />)
-          TestUtils.renderIntoDocument(
+          render(
             <Form onSubmit={onSubmitMock} subscription={{}}>
               {() => <Html5ValidationField name="foo" render={spy} />}
             </Form>
@@ -245,7 +259,7 @@ describe('Html5ValidationField', () => {
         },
         () => {
           const spy = jest.fn(({ input }) => <input {...input} />)
-          TestUtils.renderIntoDocument(
+          render(
             <Form onSubmit={onSubmitMock} subscription={{}}>
               {() => <Html5ValidationField name="foo" render={spy} />}
             </Form>
@@ -278,7 +292,7 @@ describe('Html5ValidationField', () => {
         },
         () => {
           const spy = jest.fn(({ input }) => <input {...input} />)
-          TestUtils.renderIntoDocument(
+          render(
             <Form onSubmit={onSubmitMock} subscription={{}}>
               {() => <Html5ValidationField name="foo" render={spy} />}
             </Form>
@@ -309,7 +323,7 @@ describe('Html5ValidationField', () => {
         () => {
           const spy = jest.fn(({ input }) => <input {...input} />)
           const validate = jest.fn(() => 'Special error')
-          TestUtils.renderIntoDocument(
+          render(
             <Form
               onSubmit={onSubmitMock}
               initialValues={{ foo: 'bar' }}
@@ -351,7 +365,7 @@ describe('Html5ValidationField', () => {
         () => {
           const spy = jest.fn(({ input }) => <input {...input} />)
           const validate = jest.fn(() => 'Special error')
-          TestUtils.renderIntoDocument(
+          render(
             <Form
               onSubmit={onSubmitMock}
               initialValues={{ foo: 'bar' }}
@@ -401,7 +415,7 @@ describe('Html5ValidationField', () => {
         () => {
           const spy = jest.fn(({ input }) => <input {...input} />)
           const validate = jest.fn(() => ({ deep: 'Special error' }))
-          TestUtils.renderIntoDocument(
+          render(
             <Form
               onSubmit={onSubmitMock}
               initialValues={{ foo: 'bar' }}
@@ -447,7 +461,7 @@ describe('Html5ValidationField', () => {
         () => {
           const spy = jest.fn(({ input }) => <input {...input} />)
           const validate = jest.fn(() => {})
-          TestUtils.renderIntoDocument(
+          render(
             <Form
               onSubmit={onSubmitMock}
               initialValues={{ foo: 'bar' }}
@@ -494,7 +508,7 @@ describe('Html5ValidationField', () => {
         },
         () => {
           const spy = jest.fn(({ input }) => <input {...input} />)
-          TestUtils.renderIntoDocument(
+          render(
             <Form
               onSubmit={onSubmitMock}
               initialValues={{ foo: 'bar' }}
@@ -530,7 +544,7 @@ describe('Html5ValidationField', () => {
         },
         () => {
           const spy = jest.fn(({ input }) => <input {...input} />)
-          TestUtils.renderIntoDocument(
+          render(
             <Form
               onSubmit={onSubmitMock}
               initialValues={{ foo: 'bar' }}
@@ -565,7 +579,7 @@ describe('Html5ValidationField', () => {
         },
         () => {
           const spy = jest.fn(({ input }) => <input {...input} />)
-          TestUtils.renderIntoDocument(
+          render(
             <Form
               initialValues={{ foo: 'bar' }}
               onSubmit={onSubmitMock}
