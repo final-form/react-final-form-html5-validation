@@ -1,6 +1,6 @@
 {
   "name": "react-final-form-html5-validation",
-  "version": "1.0.3",
+  "version": "1.1.0",
   "description": "A swap-in replacement for 🏁 React Final Form's <Field> component to provide HTML5 Validation",
   "main": "dist/react-final-form-html5-validation.cjs.js",
   "jsnext:main": "dist/react-final-form-html5-validation.es.js",
