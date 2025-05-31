@@ -1,10 +1,9 @@
 import resolve from 'rollup-plugin-node-resolve'
 import babel from 'rollup-plugin-babel'
-import flow from 'rollup-plugin-flow'
 import commonjs from 'rollup-plugin-commonjs'
 import { uglify } from 'rollup-plugin-uglify'
 import replace from 'rollup-plugin-replace'
-import pkg from './package.json'
+import typescript from 'rollup-plugin-typescript2'
 
 const minify = process.env.MINIFY
 const format = process.env.FORMAT
@@ -42,11 +41,8 @@ if (es) {
   throw new Error('no format specified. --environment FORMAT:xxx')
 }
 
-const deps = Object.keys(pkg.dependencies || {})
-const peers = Object.keys(pkg.peerDependencies || {})
-
 export default {
-  input: 'src/index.js',
+  input: 'src/index.ts',
   output: Object.assign(
     {
       name: 'react-final-form-html5-validation',
@@ -61,42 +57,23 @@ export default {
     },
     output
   ),
-  external: umd ? peers : deps.concat(peers),
+  external: (id) =>
+    ['react', 'react-dom', 'prop-types', 'final-form', 'react-final-form'].some(
+      (pkg) => id === pkg || id.startsWith(pkg + '/')
+    ),
   plugins: [
     resolve({ jsnext: true, main: true }),
-    flow(),
-    umd && commonjs({ include: 'node_modules/**' }),
-    babel({
-      exclude: 'node_modules/**',
-      babelrc: false,
-      presets: [
-        [
-          '@babel/preset-env',
-          {
-            modules: false,
-            loose: true
-          }
-        ],
-        '@babel/preset-flow'
-      ],
-      plugins: [
-        '@babel/plugin-transform-flow-strip-types',
-        '@babel/plugin-syntax-dynamic-import',
-        '@babel/plugin-syntax-import-meta',
-        '@babel/plugin-proposal-class-properties',
-        '@babel/plugin-proposal-json-strings',
-        [
-          '@babel/plugin-proposal-decorators',
-          {
-            legacy: true
-          }
-        ],
-        '@babel/plugin-proposal-function-sent',
-        '@babel/plugin-proposal-export-namespace-from',
-        '@babel/plugin-proposal-numeric-separator',
-        '@babel/plugin-proposal-throw-expressions'
-      ]
+    typescript({
+      tsconfig: './tsconfig.json',
+      useTsconfigDeclarationDir: true
     }),
+    commonjs({ include: 'node_modules/**' }),
+    // babel({
+    //   exclude: 'node_modules/**',
+    //   babelrc: false,
+    //   presets: [['env', { modules: false }], 'stage-2'],
+    //   plugins: ['external-helpers']
+    // }),
     umd
       ? replace({
           'process.env.NODE_ENV': JSON.stringify(

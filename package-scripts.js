@@ -1,11 +1,8 @@
-const npsUtils = require('nps-utils')
+import npsUtils from 'nps-utils'
 
-const series = npsUtils.series
-const concurrent = npsUtils.concurrent
-const rimraf = npsUtils.rimraf
-const crossEnv = npsUtils.crossEnv
+const { series, concurrent, rimraf, crossEnv } = npsUtils
 
-module.exports = {
+export default {
   scripts: {
     test: {
       default: crossEnv('NODE_ENV=test jest --coverage'),
@@ -52,13 +49,8 @@ module.exports = {
       andTest: series.nps('build', 'test.size')
     },
     copyTypes: series(
-      npsUtils.copy('src/*.js.flow dist'),
-      npsUtils.copy(
-        'dist/index.js.flow dist --rename="react-final-form-listeners.cjs.js.flow"'
-      ),
-      npsUtils.copy(
-        'dist/index.js.flow dist --rename="react-final-form-listeners.es.js.flow"'
-      )
+      rimraf('dist/*.d.ts'),
+      'tsc --emitDeclarationOnly --outDir dist'
     ),
     docs: {
       description: 'Generates table of contents in README',
@@ -68,9 +60,9 @@ module.exports = {
       description: 'lint the entire project',
       script: 'eslint .'
     },
-    flow: {
-      description: 'flow check the entire project',
-      script: 'flow check'
+    prettier: {
+      description: 'Runs prettier on everything',
+      script: 'prettier --write "**/*.([jt]s*)"'
     },
     validate: {
       description:

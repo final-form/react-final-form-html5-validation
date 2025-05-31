@@ -1,6 +1,25 @@
 {
-  "extends": "react-app",
+  "extends": ["react-app"],
+  "plugins": ["babel", "react"],
   "rules": {
-    "jsx-a11y/href-no-hash": 0
-  }
+    "no-unused-vars": "off",
+    "@typescript-eslint/no-unused-vars": [
+      "error",
+      {
+        "varsIgnorePattern": "^_",
+        "argsIgnorePattern": "^_"
+      }
+    ],
+    "jsx-a11y/href-no-hash": 0,
+    "react/jsx-uses-react": "off",
+    "react/react-in-jsx-scope": "off"
+  },
+  "overrides": [
+    {
+      "files": ["**/*.test.ts", "**/*.test.tsx"],
+      "rules": {
+        "@typescript-eslint/no-unused-vars": "off"
+      }
+    }
+  ]
 }
