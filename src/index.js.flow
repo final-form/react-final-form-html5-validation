@@ -1,5 +1,0 @@
-// @flow
-import * as React from 'react'
-import type { Html5ValidationFieldProps } from './types'
-
-declare export var Field: React.ComponentType<Html5ValidationFieldProps>

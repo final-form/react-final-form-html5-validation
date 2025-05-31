@@ -51,15 +51,7 @@ module.exports = {
       },
       andTest: series.nps('build', 'test.size')
     },
-    copyTypes: series(
-      npsUtils.copy('src/*.js.flow dist'),
-      npsUtils.copy(
-        'dist/index.js.flow dist --rename="react-final-form-listeners.cjs.js.flow"'
-      ),
-      npsUtils.copy(
-        'dist/index.js.flow dist --rename="react-final-form-listeners.es.js.flow"'
-      )
-    ),
+    copyTypes: series(npsUtils.copy('src/*.d.ts dist')),
     docs: {
       description: 'Generates table of contents in README',
       script: 'doctoc README.md'
@@ -68,9 +60,9 @@ module.exports = {
       description: 'lint the entire project',
       script: 'eslint .'
     },
-    flow: {
-      description: 'flow check the entire project',
-      script: 'flow check'
+    prettier: {
+      description: 'Runs prettier on everything',
+      script: 'prettier --write "**/*.([jt]s*)"'
     },
     validate: {
       description:
