@@ -35,6 +35,18 @@ yarn add react-final-form-html5-validation react-final-form final-form
 
 [![Edit 🏁 React Final Form - HTML5 Validation Example](https://codesandbox.io/static/img/play-codesandbox.svg)](https://codesandbox.io/s/14r018yjp4)
 
+## React Compatibility
+
+This library supports React 16.8+ (with Hooks), React 17, React 18, and React 19.
+
+**Supported versions:**
+- React 16.8.0 or higher
+- React 17.x
+- React 18.x
+- React 19.x
+
+**Note:** CI currently tests against React 18.x. While the library is compatible with React 16.8+, 17.x, and 19.x based on the peer dependency declaration, full automated test coverage across all versions is not yet implemented.
+
 ## Usage
 
 The way you specify rules and error messages in HTML5 is by giving first a rule prop, e.g. `required`, `min`, `maxLength`, and then an error message prop, e.g. `valueMissing`, `rangeUnderflow`, or `tooLong`, respectively. This library comes with built-in English defaults for the error messages, but you will probably want to override those by passing in your own.
