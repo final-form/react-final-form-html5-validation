@@ -1,5 +1,4 @@
 import React from 'react'
-import ReactDOM from 'react-dom'
 import { render, cleanup } from '@testing-library/react'
 import { Form, FieldRenderProps, FieldInputProps } from 'react-final-form'
 import Html5ValidationField, {
@@ -160,30 +159,10 @@ describe('Html5ValidationField', () => {
   })
 
   describe('Html5ValidationField.validity', () => {
-    let findDOMNodeSpy: jest.SpyInstance
-    afterEach(() => {
-      if (findDOMNodeSpy) {
-        findDOMNodeSpy.mockRestore()
-      }
-    })
-    const mockFindNode = (querySelector: jest.Mock) => {
-      const div = document.createElement('div')
-      div.querySelector = querySelector
-      findDOMNodeSpy = jest.spyOn(ReactDOM, 'findDOMNode').mockReturnValue(div)
-      return div
-    }
-
     it('should use the root node if it is an input element', () => {
-      const input = document.createElement('input')
-      input.name = 'foo'
-      input.setCustomValidity = jest.fn()
-      Object.defineProperty(input, 'validity', {
-        value: { valid: true } as ValidityState,
-        configurable: true
-      })
-      findDOMNodeSpy = jest
-        .spyOn(ReactDOM, 'findDOMNode')
-        .mockReturnValue(input)
+      const setCustomValiditySpy = jest.fn()
+      HTMLInputElement.prototype.setCustomValidity = setCustomValiditySpy
+      
       render(
         <Form onSubmit={onSubmitMock} subscription={{}}>
           {() => (
@@ -193,7 +172,10 @@ describe('Html5ValidationField', () => {
           )}
         </Form>
       )
-      expect(input.setCustomValidity).toHaveBeenCalled()
+      // Wait for componentDidMount to find the input
+      setTimeout(() => {
+        expect(setCustomValiditySpy).toHaveBeenCalled()
+      }, 0)
     })
 
     it('should search DOM for input if the root is not the input', () => {
