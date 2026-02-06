@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { Field } from 'react-final-form'
+import { Field, FieldRenderProps } from 'react-final-form'
 import { Html5ValidationFieldProps } from './types'
 import warning from './warning'
 
@@ -23,7 +23,7 @@ interface WithValidity {
 
 class Html5ValidationField extends React.Component<Html5ValidationFieldProps> {
   private input: WithValidity | null = null
-  private rootRef = React.createRef<HTMLElement>()
+  private fieldRef = React.createRef<any>()
 
   static defaultProps = {
     badInput: 'Incorrect input',
@@ -42,7 +42,17 @@ class Html5ValidationField extends React.Component<Html5ValidationFieldProps> {
   }
 
   componentDidMount(): void {
-    const root = this.rootRef.current
+    this.findInput()
+  }
+
+  componentDidUpdate(): void {
+    if (!this.input) {
+      this.findInput()
+    }
+  }
+
+  private findInput = (): void => {
+    const root = this.fieldRef.current
     if (root) {
       let input: WithValidity | null = null
       if (/input|textarea|select/.test(root.nodeName.toLowerCase())) {
@@ -120,6 +130,9 @@ class Html5ValidationField extends React.Component<Html5ValidationFieldProps> {
       typeMismatch,
       valueMissing,
       innerRef,
+      component,
+      render,
+      children,
       ...rest
     } = this.props
 
@@ -137,11 +150,9 @@ class Html5ValidationField extends React.Component<Html5ValidationFieldProps> {
       ...fieldProps
     } = rest
 
-    // Merge innerRef with rootRef for internal use
+    // Merge innerRef with fieldRef
     const mergedRef = (node: HTMLElement | null) => {
-      // Set internal ref
-      (this.rootRef as React.MutableRefObject<HTMLElement | null>).current = node
-      // Call innerRef if provided
+      (this.fieldRef as React.MutableRefObject<HTMLElement | null>).current = node
       if (typeof innerRef === 'function') {
         innerRef(node)
       } else if (innerRef) {
@@ -149,11 +160,28 @@ class Html5ValidationField extends React.Component<Html5ValidationFieldProps> {
       }
     }
 
+    // Wrap render function to inject ref
+    const wrappedRender = (fieldProps: FieldRenderProps<any, HTMLElement>) => {
+      // Call user's render/children function if provided
+      const userRender = render || children
+      if (userRender && typeof userRender === 'function') {
+        const element = userRender(fieldProps)
+        // Clone and inject ref
+        return React.isValidElement(element)
+          ? React.cloneElement(element, { ref: mergedRef } as any)
+          : element
+      }
+      // Default: render input with ref
+      return React.createElement(component || 'input', {
+        ...fieldProps.input,
+        ref: mergedRef
+      })
+    }
+
     return React.createElement(Field, {
       ...fieldProps,
       validate: this.validate,
-      ref: mergedRef,
-      component: 'input'
+      children: wrappedRender
     })
   }
 }
