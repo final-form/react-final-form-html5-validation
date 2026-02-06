@@ -1,5 +1,4 @@
 import * as React from 'react'
-import ReactDOM from 'react-dom'
 import { Field } from 'react-final-form'
 import { Html5ValidationFieldProps } from './types'
 import warning from './warning'
@@ -24,6 +23,7 @@ interface WithValidity {
 
 class Html5ValidationField extends React.Component<Html5ValidationFieldProps> {
   private input: WithValidity | null = null
+  private rootRef = React.createRef<HTMLElement>()
 
   static defaultProps = {
     badInput: 'Incorrect input',
@@ -42,7 +42,7 @@ class Html5ValidationField extends React.Component<Html5ValidationFieldProps> {
   }
 
   componentDidMount(): void {
-    const root = ReactDOM.findDOMNode(this)
+    const root = this.rootRef.current
     if (root) {
       let input: WithValidity | null = null
       if (/input|textarea|select/.test(root.nodeName.toLowerCase())) {
@@ -137,10 +137,22 @@ class Html5ValidationField extends React.Component<Html5ValidationFieldProps> {
       ...fieldProps
     } = rest
 
+    // Merge innerRef with rootRef for internal use
+    const mergedRef = (node: HTMLElement | null) => {
+      // Set internal ref
+      (this.rootRef as React.MutableRefObject<HTMLElement | null>).current = node
+      // Call innerRef if provided
+      if (typeof innerRef === 'function') {
+        innerRef(node)
+      } else if (innerRef) {
+        (innerRef as React.MutableRefObject<HTMLElement | null>).current = node
+      }
+    }
+
     return React.createElement(Field, {
       ...fieldProps,
       validate: this.validate,
-      ref: innerRef as React.Ref<HTMLElement>,
+      ref: mergedRef,
       component: 'input'
     })
   }
