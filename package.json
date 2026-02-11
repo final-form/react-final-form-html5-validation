@@ -54,7 +54,6 @@
     "babel-core": "^7.0.0-bridge.0",
     "babel-eslint": "^10.1.0",
     "babel-jest": "^29.7.0",
-    "bundlesize": "^0.18.2",
     "doctoc": "^2.2.1",
     "eslint": "^9.27.0",
     "eslint-config-react-app": "^7.0.1",
@@ -87,7 +86,9 @@
     "rollup-plugin-typescript2": "^0.36.0",
     "rollup-plugin-uglify": "^6.0.4",
     "ts-jest": "^29.3.4",
-    "typescript": "^5.3.3"
+    "typescript": "^5.3.3",
+    "@size-limit/preset-small-lib": "^12.0.0",
+    "size-limit": "^12.0.0"
   },
   "peerDependencies": {
     "final-form": ">=5.0.0",
@@ -107,18 +108,18 @@
       "git add"
     ]
   },
-  "bundlesize": [
+  "size-limit": [
     {
       "path": "dist/react-final-form-html5-validation.umd.min.js",
-      "maxSize": "2 kB"
+      "limit": "2 kB"
     },
     {
       "path": "dist/react-final-form-html5-validation.es.js",
-      "maxSize": "3 kB"
+      "limit": "3 kB"
     },
     {
       "path": "dist/react-final-form-html5-validation.cjs.js",
-      "maxSize": "3 kB"
+      "limit": "3 kB"
     }
   ],
   "collective": {
