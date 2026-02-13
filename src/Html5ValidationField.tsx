@@ -23,7 +23,7 @@ interface WithValidity {
 
 class Html5ValidationField extends React.Component<Html5ValidationFieldProps> {
   private input: WithValidity | null = null
-  private fieldRef = React.createRef<any>()
+  private fieldRef = React.createRef<HTMLElement | null>()
 
   static defaultProps = {
     badInput: 'Incorrect input',
@@ -178,24 +178,27 @@ class Html5ValidationField extends React.Component<Html5ValidationFieldProps> {
       })
     }
 
-    return React.createElement(Field, {
-      ...fieldProps,
-      validate: this.validate,
-      children: wrappedRender
-    })
+    return React.createElement(
+      Field,
+      {
+        ...fieldProps,
+        validate: this.validate
+      },
+      wrappedRender
+    )
   }
 }
 
 function Html5ValidationFieldWithRef(
   props: Omit<Html5ValidationFieldProps, 'ref'>,
-  ref: React.Ref<Html5ValidationField>
+  ref: React.Ref<HTMLElement>
 ): React.ReactElement {
   const { name, ...rest } = props
   return <Html5ValidationField name={name} {...rest} innerRef={ref} />
 }
 
 const ForwardedHtml5ValidationField = React.forwardRef<
-  Html5ValidationField,
+  HTMLElement,
   Omit<Html5ValidationFieldProps, 'ref'>
 >(Html5ValidationFieldWithRef)
 

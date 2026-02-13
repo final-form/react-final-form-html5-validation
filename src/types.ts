@@ -17,5 +17,5 @@ export interface Messages {
 
 export interface Html5ValidationFieldProps extends FieldProps, Messages {
   validate?: FieldValidator<unknown>
-  innerRef?: React.Ref<Html5ValidationField>
+  innerRef?: React.Ref<HTMLElement>
 } 

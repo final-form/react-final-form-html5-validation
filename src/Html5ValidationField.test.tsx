@@ -1,5 +1,5 @@
 import React from 'react'
-import { render, cleanup } from '@testing-library/react'
+import { render, cleanup, waitFor } from '@testing-library/react'
 import { Form, FieldRenderProps, FieldInputProps } from 'react-final-form'
 import Html5ValidationField, {
   Html5ValidationField as Html5ValidationFieldClass
@@ -159,9 +159,11 @@ describe('Html5ValidationField', () => {
   })
 
   describe('Html5ValidationField.validity', () => {
-    it('should use the root node if it is an input element', () => {
-      const setCustomValiditySpy = jest.fn()
-      HTMLInputElement.prototype.setCustomValidity = setCustomValiditySpy
+    it('should use the root node if it is an input element', async () => {
+      const setCustomValiditySpy = jest.spyOn(
+        HTMLInputElement.prototype,
+        'setCustomValidity'
+      )
       
       render(
         <Form onSubmit={onSubmitMock} subscription={{}}>
@@ -173,9 +175,10 @@ describe('Html5ValidationField', () => {
         </Form>
       )
       // Wait for componentDidMount to find the input
-      setTimeout(() => {
+      await waitFor(() => {
         expect(setCustomValiditySpy).toHaveBeenCalled()
-      }, 0)
+      })
+      setCustomValiditySpy.mockRestore()
     })
 
     it('should search DOM for input if the root is not the input', () => {
