@@ -159,12 +159,69 @@ describe('Html5ValidationField', () => {
   })
 
   describe('Html5ValidationField.validity', () => {
+    const renderWithNestedInput = ({
+      name = 'foo',
+      validity = { valid: true } as ValidityState,
+      validationMessage,
+      validate,
+      fieldProps = {},
+      initialValues = {}
+    }: {
+      name?: string
+      validity?: ValidityState
+      validationMessage?: string
+      validate?: (value: unknown, allValues: object) => unknown
+      fieldProps?: Record<string, unknown>
+      initialValues?: Record<string, unknown>
+    } = {}) => {
+      const setCustomValidity = jest.fn()
+      const result = render(
+        <Form
+          onSubmit={onSubmitMock}
+          subscription={{}}
+          initialValues={initialValues}
+        >
+          {() => (
+            <Html5ValidationField
+              name={name}
+              validate={validate}
+              {...fieldProps}
+            >
+              {({ input }: TestFieldRenderProps) => (
+                <div>
+                  <input
+                    {...input}
+                    ref={(node) => {
+                      if (node) {
+                        node.setCustomValidity = setCustomValidity
+                        Object.defineProperty(node, 'validity', {
+                          value: validity,
+                          configurable: true
+                        })
+                        if (validationMessage) {
+                          Object.defineProperty(node, 'validationMessage', {
+                            value: validationMessage,
+                            configurable: true
+                          })
+                        }
+                      }
+                    }}
+                  />
+                </div>
+              )}
+            </Html5ValidationField>
+          )}
+        </Form>
+      )
+      return { ...result, setCustomValidity }
+    }
+
     it('should use the root node if it is an input element', async () => {
       const setCustomValiditySpy = jest.spyOn(
         HTMLInputElement.prototype,
         'setCustomValidity'
       )
-      
+
       render(
         <Form onSubmit={onSubmitMock} subscription={{}}>
           {() => (
@@ -174,104 +231,64 @@ describe('Html5ValidationField', () => {
           )}
         </Form>
       )
-      // Wait for componentDidMount to find the input
       await waitFor(() => {
         expect(setCustomValiditySpy).toHaveBeenCalled()
       })
       setCustomValiditySpy.mockRestore()
     })
 
-    it('should search DOM for input if the root is not the input', () => {
-      const input = document.createElement('input')
-      input.name = 'foo'
-      const querySelector = jest.fn().mockReturnValue(input)
-      const div = mockFindNode(querySelector)
-      render(
-        <Form onSubmit={() => {}}>
-          {() => (
-            <Html5ValidationField name="foo">
-              {({ input }: TestFieldRenderProps) => (
-                <div ref={() => div}>{input.value}</div>
-              )}
-            </Html5ValidationField>
-          )}
-        </Form>
+    it('should search DOM for input if the root is not the input', async () => {
+      const querySelectorSpy = jest.spyOn(
+        HTMLElement.prototype,
+        'querySelector'
       )
-      expect(querySelector).toHaveBeenCalled()
-      expect(querySelector).toHaveBeenCalledTimes(1)
-      const calls = querySelector.mock.calls
-      if (calls.length > 0) {
-        expect(calls[0][0]).toBe(
-          'input[name="foo"],textarea[name="foo"],select[name="foo"]'
-        )
-      }
+      const { setCustomValidity } = renderWithNestedInput()
+      await waitFor(() => expect(setCustomValidity).toHaveBeenCalled())
+      expect(querySelectorSpy).toHaveBeenCalledWith(
+        'input[name="foo"],textarea[name="foo"],select[name="foo"]'
+      )
+      querySelectorSpy.mockRestore()
     })
 
-    it('should search DOM for input if the root is not the input, even for deep fields', () => {
-      const input = document.createElement('input')
-      input.name = 'foo.bar'
-      const querySelector = jest.fn().mockReturnValue(input)
-      const div = mockFindNode(querySelector)
-      render(
-        <Form onSubmit={() => {}}>
-          {() => (
-            <Html5ValidationField name="foo.bar">
-              {({ input }: TestFieldRenderProps) => (
-                <div ref={() => div}>{input.value}</div>
-              )}
-            </Html5ValidationField>
-          )}
-        </Form>
+    it('should search DOM for input if the root is not the input, even for deep fields', async () => {
+      const querySelectorSpy = jest.spyOn(
+        HTMLElement.prototype,
+        'querySelector'
       )
-      expect(querySelector).toHaveBeenCalled()
-      expect(querySelector).toHaveBeenCalledTimes(1)
-      const calls = querySelector.mock.calls
-      if (calls.length > 0) {
-        expect(calls[0][0]).toBe(
-          'input[name="foo.bar"],textarea[name="foo.bar"],select[name="foo.bar"]'
-        )
-      }
-    })
-
-    it('should fail silently if no DOM node could be found (probably SSR)', () => {
-      const consoleSpy = jest
-        .spyOn(global.console, 'error')
-        .mockImplementation(() => {})
-      findDOMNodeSpy = jest.spyOn(ReactDOM, 'findDOMNode').mockReturnValue(null)
-      render(
-        <Form onSubmit={onSubmitMock} subscription={{}}>
-          {() => (
-            <Html5ValidationField name="foo">
-              {({ input }: TestFieldRenderProps) => <input {...input} />}
-            </Html5ValidationField>
-          )}
-        </Form>
+      const { setCustomValidity } = renderWithNestedInput({ name: 'foo.bar' })
+      await waitFor(() => expect(setCustomValidity).toHaveBeenCalled())
+      expect(querySelectorSpy).toHaveBeenCalledWith(
+        'input[name="foo.bar"],textarea[name="foo.bar"],select[name="foo.bar"]'
       )
-      expect(consoleSpy).not.toHaveBeenCalled()
-      consoleSpy.mockRestore()
+      querySelectorSpy.mockRestore()
     })
 
     it('should warn if no input could be found because DOM node has no querySelector API', () => {
       const consoleSpy = jest
         .spyOn(global.console, 'error')
         .mockImplementation(() => {})
-      const div = document.createElement('div')
-      Object.defineProperty(div, 'querySelector', {
-        value: undefined,
-        configurable: true
-      })
       render(
         <Form onSubmit={onSubmitMock} subscription={{}}>
           {() => (
             <Html5ValidationField name="foo">
               {({ input }: TestFieldRenderProps) => (
-                <div ref={() => div}>{input.value}</div>
+                <div
+                  ref={(node) => {
+                    if (node) {
+                      Object.defineProperty(node, 'querySelector', {
+                        value: undefined,
+                        configurable: true
+                      })
+                    }
+                  }}
+                >
+                  {input.value}
+                </div>
               )}
             </Html5ValidationField>
           )}
         </Form>
       )
-      expect(consoleSpy).toHaveBeenCalled()
       expect(consoleSpy).toHaveBeenCalledTimes(1)
       expect(consoleSpy).toHaveBeenCalledWith(
         'Warning: Could not find DOM input with HTML validity API'
@@ -283,327 +300,6 @@ describe('Html5ValidationField', () => {
       const consoleSpy = jest
         .spyOn(global.console, 'error')
         .mockImplementation(() => {})
-      const querySelector = jest.fn(() => null)
-      const div = mockFindNode(querySelector)
-      render(
-        <Form onSubmit={onSubmitMock} subscription={{}}>
-          {() => (
-            <Html5ValidationField name="foo">
-              {({ input }: TestFieldRenderProps) => (
-                <div ref={() => div}>{input.value}</div>
-              )}
-            </Html5ValidationField>
-          )}
-        </Form>
-      )
-      expect(querySelector).toHaveBeenCalled()
-      expect(querySelector).toHaveBeenCalledTimes(1)
-      expect(querySelector).toHaveBeenCalledWith(
-        'input[name="foo"],textarea[name="foo"],select[name="foo"]'
-      )
-      expect(consoleSpy).toHaveBeenCalled()
-      expect(consoleSpy).toHaveBeenCalledTimes(1)
-      expect(consoleSpy).toHaveBeenCalledWith(
-        'Warning: Could not find DOM input with HTML validity API'
-      )
-      consoleSpy.mockRestore()
-    })
-
-    it('should read/write validity from/to the input', () => {
-      const setCustomValidity = jest.fn()
-      const input = document.createElement('input')
-      input.name = 'foo'
-      input.setCustomValidity = setCustomValidity
-      Object.defineProperty(input, 'validity', {
-        value: {
-          valueMissing: true,
-          valid: false
-        } as ValidityState,
-        configurable: true
-      })
-      const querySelector = jest.fn().mockReturnValue(input)
-      const div = mockFindNode(querySelector)
-      render(
-        <Form onSubmit={onSubmitMock} subscription={{}}>
-          {() => (
-            <Html5ValidationField name="foo">
-              {({ input }: TestFieldRenderProps) => (
-                <div ref={() => div}>{input.value}</div>
-              )}
-            </Html5ValidationField>
-          )}
-        </Form>
-      )
-      expect(setCustomValidity).toHaveBeenCalled()
-      expect(setCustomValidity).toHaveBeenCalledTimes(2)
-      expect(setCustomValidity.mock.calls[0][0]).toBe('')
-      expect(setCustomValidity.mock.calls[1][0]).toBe('Required')
-    })
-
-    it('should use field-level validation function', () => {
-      const validate = jest.fn().mockReturnValue('bar')
-      const setCustomValidity = jest.fn()
-      const input = document.createElement('input')
-      input.name = 'foo'
-      input.setCustomValidity = setCustomValidity
-      Object.defineProperty(input, 'validity', {
-        value: { valid: true } as ValidityState,
-        configurable: true
-      })
-      const querySelector = jest.fn().mockReturnValue(input)
-      const div = document.createElement('div')
-      div.querySelector = querySelector
-      findDOMNodeSpy = jest.spyOn(ReactDOM, 'findDOMNode').mockReturnValue(div)
-      render(
-        <Form
-          onSubmit={onSubmitMock}
-          subscription={{}}
-          initialValues={{ foo: 'test' }}
-        >
-          {() => (
-            <Html5ValidationField name="foo" validate={validate}>
-              {({ input }: TestFieldRenderProps) => (
-                <div ref={() => div}>{input.value}</div>
-              )}
-            </Html5ValidationField>
-          )}
-        </Form>
-      )
-      expect(validate).toHaveBeenCalled()
-      expect(validate).toHaveBeenCalledTimes(1)
-      expect(validate.mock.calls[0][0]).toBe('test')
-    })
-
-    it('should not call setCustomValidity if no validity API is found', () => {
-      const consoleSpy = jest
-        .spyOn(global.console, 'error')
-        .mockImplementation(() => {})
-      const querySelector = jest.fn(() => null)
-      const div = mockFindNode(querySelector)
-      render(
-        <Form onSubmit={onSubmitMock} subscription={{}}>
-          {() => (
-            <Html5ValidationField name="foo">
-              {({ input }: TestFieldRenderProps) => (
-                <div ref={() => div}>{input.value}</div>
-              )}
-            </Html5ValidationField>
-          )}
-        </Form>
-      )
-      expect(consoleSpy).toHaveBeenCalled()
-      expect(consoleSpy).toHaveBeenCalledTimes(1)
-      expect(consoleSpy).toHaveBeenCalledWith(
-        'Warning: Could not find DOM input with HTML validity API'
-      )
-      consoleSpy.mockRestore()
-    })
-
-    it('should not call setCustomValidity if validation error is not a string', () => {
-      const consoleSpy = jest
-        .spyOn(global.console, 'error')
-        .mockImplementation(() => {})
-      const setCustomValidity = jest.fn()
-      const input = document.createElement('input')
-      input.name = 'foo'
-      input.setCustomValidity = setCustomValidity
-      Object.defineProperty(input, 'validity', {
-        value: {
-          valid: false,
-          valueMissing: false
-        } as ValidityState,
-        configurable: true
-      })
-      const querySelector = jest.fn().mockReturnValue(input)
-      const div = document.createElement('div')
-      div.querySelector = querySelector
-      findDOMNodeSpy = jest.spyOn(ReactDOM, 'findDOMNode').mockReturnValue(div)
-      const validate = () => ({ notAString: true })
-      render(
-        <Form
-          onSubmit={onSubmitMock}
-          subscription={{}}
-          initialValues={{ foo: 'test' }}
-        >
-          {() => (
-            <Html5ValidationField name="foo" validate={validate}>
-              {({ input }: TestFieldRenderProps) => (
-                <div ref={() => div}>{input.value}</div>
-              )}
-            </Html5ValidationField>
-          )}
-        </Form>
-      )
-      expect(consoleSpy).not.toHaveBeenCalled()
-      setCustomValidity.mock.calls.forEach((call) => {
-        expect(call[0]).toBe('')
-      })
-      consoleSpy.mockRestore()
-    })
-
-    it('should not call setCustomValidity if no validation error', () => {
-      const consoleSpy = jest
-        .spyOn(global.console, 'error')
-        .mockImplementation(() => {})
-      const setCustomValidity = jest.fn()
-      const input = document.createElement('input')
-      input.name = 'foo'
-      input.setCustomValidity = setCustomValidity
-      Object.defineProperty(input, 'validity', {
-        value: {
-          valid: true
-        } as ValidityState,
-        configurable: true
-      })
-      const querySelector = jest.fn().mockReturnValue(input)
-      const div = mockFindNode(querySelector)
-      render(
-        <Form onSubmit={onSubmitMock} subscription={{}}>
-          {() => (
-            <Html5ValidationField name="foo">
-              {({ input }: TestFieldRenderProps) => (
-                <div ref={() => div}>{input.value}</div>
-              )}
-            </Html5ValidationField>
-          )}
-        </Form>
-      )
-      expect(consoleSpy).not.toHaveBeenCalled()
-      expect(setCustomValidity).toHaveBeenCalled()
-      expect(setCustomValidity).toHaveBeenCalledTimes(1)
-      expect(setCustomValidity.mock.calls[0][0]).toBe('')
-      consoleSpy.mockRestore()
-    })
-
-    it('should not call setCustomValidity if valid === true', () => {
-      const consoleSpy = jest
-        .spyOn(global.console, 'error')
-        .mockImplementation(() => {})
-      const setCustomValidity = jest.fn()
-      const input = document.createElement('input')
-      input.name = 'foo'
-      input.setCustomValidity = setCustomValidity
-      Object.defineProperty(input, 'validity', {
-        value: {
-          valid: true
-        } as ValidityState,
-        configurable: true
-      })
-      const querySelector = jest.fn().mockReturnValue(input)
-      const div = mockFindNode(querySelector)
-      render(
-        <Form onSubmit={onSubmitMock} subscription={{}}>
-          {() => (
-            <Html5ValidationField name="foo">
-              {({ input }: TestFieldRenderProps) => (
-                <div ref={() => div}>{input.value}</div>
-              )}
-            </Html5ValidationField>
-          )}
-        </Form>
-      )
-      expect(consoleSpy).not.toHaveBeenCalled()
-      expect(setCustomValidity).toHaveBeenCalled()
-      expect(setCustomValidity).toHaveBeenCalledTimes(1)
-      expect(setCustomValidity.mock.calls[0][0]).toBe('')
-      consoleSpy.mockRestore()
-    })
-
-    it('should report back validity custom error to Final Form', () => {
-      const consoleSpy = jest
-        .spyOn(global.console, 'error')
-        .mockImplementation(() => {})
-      const setCustomValidity = jest.fn()
-      const input = document.createElement('input')
-      input.name = 'foo'
-      input.setCustomValidity = setCustomValidity
-      Object.defineProperty(input, 'validity', {
-        value: {
-          valid: false,
-          customError: true
-        } as ValidityState,
-        configurable: true
-      })
-      Object.defineProperty(input, 'validationMessage', {
-        value: 'Ooh, how custom!',
-        configurable: true
-      })
-      const querySelector = jest.fn().mockReturnValue(input)
-      const div = mockFindNode(querySelector)
-      render(
-        <Form onSubmit={onSubmitMock} subscription={{}}>
-          {() => (
-            <Html5ValidationField name="foo">
-              {({ input }: TestFieldRenderProps) => (
-                <div ref={() => div}>{input.value}</div>
-              )}
-            </Html5ValidationField>
-          )}
-        </Form>
-      )
-      expect(consoleSpy).not.toHaveBeenCalled()
-      expect(setCustomValidity).toHaveBeenCalled()
-      expect(setCustomValidity).toHaveBeenCalledTimes(1)
-      expect(setCustomValidity.mock.calls[0][0]).toBe('')
-      consoleSpy.mockRestore()
-    })
-
-    it('should support functions as default error keys', () => {
-      const setCustomValidity = jest.fn()
-      const input = document.createElement('input')
-      input.name = 'foo'
-      input.setCustomValidity = setCustomValidity
-      Object.defineProperty(input, 'validity', {
-        value: {
-          tooShort: true,
-          valid: false
-        } as ValidityState,
-        configurable: true
-      })
-      const querySelector = jest.fn().mockReturnValue(input)
-      const div = document.createElement('div')
-      div.querySelector = querySelector
-      findDOMNodeSpy = jest.spyOn(ReactDOM, 'findDOMNode').mockReturnValue(div)
-      render(
-        <Form
-          onSubmit={onSubmitMock}
-          subscription={{}}
-          initialValues={{ foo: 'bar' }}
-        >
-          {() => (
-            <Html5ValidationField
-              tooShort={(value?: unknown, props?: Record<string, unknown>) =>
-                `Value ${value} should have at least ${props?.minLength} characters.`
-              }
-              minLength={8}
-              name="foo"
-            >
-              {({ input }: TestFieldRenderProps) => (
-                <div ref={() => div}>{input.value}</div>
-              )}
-            </Html5ValidationField>
-          )}
-        </Form>
-      )
-      expect(setCustomValidity).toHaveBeenCalledTimes(2)
-      expect(setCustomValidity.mock.calls[0][0]).toBe('')
-      expect(setCustomValidity.mock.calls[1][0]).toBe(
-        'Value bar should have at least 8 characters.'
-      )
-    })
-
-    it('should warn if the root node is not an input and has no querySelector API', () => {
-      const consoleSpy = jest
-        .spyOn(global.console, 'error')
-        .mockImplementation(() => {})
-      const root = document.createElement('div')
-      Object.defineProperty(root, 'querySelector', {
-        value: undefined,
-        configurable: true
-      })
-      const findDOMNodeSpy = jest
-        .spyOn(ReactDOM, 'findDOMNode')
-        .mockReturnValue(root)
       render(
         <Form onSubmit={onSubmitMock} subscription={{}}>
           {() => (
@@ -617,7 +313,90 @@ describe('Html5ValidationField', () => {
         'Warning: Could not find DOM input with HTML validity API'
       )
       consoleSpy.mockRestore()
-      findDOMNodeSpy.mockRestore()
+    })
+
+    it('should read/write validity from/to the input', async () => {
+      const { setCustomValidity } = renderWithNestedInput({
+        validity: {
+          valueMissing: true,
+          valid: false
+        } as ValidityState
+      })
+      await waitFor(() => expect(setCustomValidity).toHaveBeenCalledTimes(2))
+      expect(setCustomValidity.mock.calls[0][0]).toBe('')
+      expect(setCustomValidity.mock.calls[1][0]).toBe('Required')
+    })
+
+    it('should use field-level validation function', async () => {
+      const validate = jest.fn().mockReturnValue('bar')
+      const { setCustomValidity } = renderWithNestedInput({
+        validate,
+        initialValues: { foo: 'test' }
+      })
+      await waitFor(() => expect(validate).toHaveBeenCalled())
+      expect(validate.mock.calls[0][0]).toBe('test')
+      expect(setCustomValidity).toHaveBeenCalledWith('bar')
+    })
+
+    it('should not call setCustomValidity if validation error is not a string', async () => {
+      const consoleSpy = jest
+        .spyOn(global.console, 'error')
+        .mockImplementation(() => {})
+      const validate = jest.fn(() => ({ notAString: true }))
+      const { setCustomValidity } = renderWithNestedInput({
+        validate,
+        initialValues: { foo: 'test' },
+        validity: {
+          valid: false,
+          valueMissing: false
+        } as ValidityState
+      })
+      await waitFor(() => expect(validate).toHaveBeenCalled())
+      expect(consoleSpy).not.toHaveBeenCalled()
+      expect(setCustomValidity).not.toHaveBeenCalled()
+      consoleSpy.mockRestore()
+    })
+
+    it('should not call setCustomValidity with an error if no validation error', async () => {
+      const consoleSpy = jest
+        .spyOn(global.console, 'error')
+        .mockImplementation(() => {})
+      const { setCustomValidity } = renderWithNestedInput()
+      await waitFor(() => expect(setCustomValidity).toHaveBeenCalledTimes(1))
+      expect(consoleSpy).not.toHaveBeenCalled()
+      expect(setCustomValidity.mock.calls[0][0]).toBe('')
+      consoleSpy.mockRestore()
+    })
+
+    it('should report back validity custom error to Final Form', async () => {
+      const { setCustomValidity } = renderWithNestedInput({
+        validity: {
+          valid: false,
+          customError: true
+        } as ValidityState,
+        validationMessage: 'Ooh, how custom!'
+      })
+      await waitFor(() => expect(setCustomValidity).toHaveBeenCalledTimes(1))
+      expect(setCustomValidity.mock.calls[0][0]).toBe('')
+    })
+
+    it('should support functions as default error keys', async () => {
+      const { setCustomValidity } = renderWithNestedInput({
+        validity: {
+          tooShort: true,
+          valid: false
+        } as ValidityState,
+        initialValues: { foo: 'bar' },
+        fieldProps: {
+          minLength: 8,
+          tooShort: (value?: unknown, props?: Record<string, unknown>) =>
+            `Value ${value} should have at least ${props?.minLength} characters.`
+        }
+      })
+      await waitFor(() => expect(setCustomValidity).toHaveBeenCalledTimes(2))
+      expect(setCustomValidity.mock.calls[1][0]).toBe(
+        'Value bar should have at least 8 characters.'
+      )
     })
 
     it('should use validate prop when no input element is found', async () => {
@@ -625,7 +404,6 @@ describe('Html5ValidationField', () => {
       const consoleSpy = jest
         .spyOn(global.console, 'error')
         .mockImplementation(() => {})
-      findDOMNodeSpy = jest.spyOn(ReactDOM, 'findDOMNode').mockReturnValue(null)
       render(
         <Form onSubmit={onSubmitMock} subscription={{}}>
           {() => (
@@ -635,14 +413,11 @@ describe('Html5ValidationField', () => {
           )}
         </Form>
       )
-      // Wait for component to mount and validate
-      await new Promise((resolve) => setTimeout(resolve, 0))
+      await waitFor(() => expect(validate).toHaveBeenCalled())
       expect(consoleSpy).toHaveBeenCalledWith(
         'Warning: Could not find DOM input with HTML validity API'
       )
-      expect(validate).toHaveBeenCalled()
       consoleSpy.mockRestore()
-      findDOMNodeSpy.mockRestore()
     })
   })
 })

@@ -45,12 +45,6 @@ class Html5ValidationField extends React.Component<Html5ValidationFieldProps> {
     this.findInput()
   }
 
-  componentDidUpdate(): void {
-    if (!this.input) {
-      this.findInput()
-    }
-  }
-
   private findInput = (): void => {
     const root = this.fieldRef.current
     if (root) {
@@ -152,39 +146,50 @@ class Html5ValidationField extends React.Component<Html5ValidationFieldProps> {
 
     // Merge innerRef with fieldRef
     const mergedRef = (node: HTMLElement | null) => {
-      (this.fieldRef as React.MutableRefObject<HTMLElement | null>).current = node
+      ;(this.fieldRef as React.MutableRefObject<HTMLElement | null>).current =
+        node
       if (typeof innerRef === 'function') {
         innerRef(node)
       } else if (innerRef) {
-        (innerRef as React.MutableRefObject<HTMLElement | null>).current = node
+        ;(innerRef as React.MutableRefObject<HTMLElement | null>).current = node
       }
     }
 
     // Wrap render function to inject ref
-    const wrappedRender = (fieldProps: FieldRenderProps<any, HTMLElement>) => {
+    const wrappedRender = (
+      fieldProps: FieldRenderProps<unknown, HTMLElement>
+    ) => {
       // Call user's render/children function if provided
       const userRender = render || children
       if (userRender && typeof userRender === 'function') {
         const element = userRender(fieldProps)
         // Clone and inject ref
         return React.isValidElement(element)
-          ? React.cloneElement(element, { ref: mergedRef } as any)
+          ? React.cloneElement(element, {
+              ref: mergedRef
+            } as React.RefAttributes<HTMLElement>)
           : element
       }
-      // Default: render input with ref
+      // Default: render input with ref and pass through HTML field props
       return React.createElement(component || 'input', {
+        ...fieldProps,
         ...fieldProps.input,
         ref: mergedRef
       })
     }
 
-    return React.createElement(
-      Field,
-      {
-        ...fieldProps,
-        validate: this.validate
-      },
-      wrappedRender
+    const validateField = this.validate
+    const FieldComponent = Field as React.ComponentType<
+      typeof fieldProps & {
+        children: typeof wrappedRender
+        validate: typeof validateField
+      }
+    >
+
+    return (
+      <FieldComponent {...fieldProps} validate={validateField}>
+        {wrappedRender}
+      </FieldComponent>
     )
   }
 }
