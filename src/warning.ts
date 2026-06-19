@@ -5,6 +5,6 @@ export default function warning(condition: boolean, message: string): void {
     }
     try {
       throw new Error(`Warning: ${message}`)
-    } catch (e) { }
+    } catch (e) {}
   }
-} 
+}
